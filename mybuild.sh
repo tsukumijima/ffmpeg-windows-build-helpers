@@ -2,10 +2,10 @@
 directory=$(cd $(dirname $0);pwd)
 version=$1
 
-sandbox_win32_static="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n4.3.1"
-sandbox_win32_shared="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n4.3.1_shared"
-sandbox_win64_static="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n4.3.1"
-sandbox_win64_shared="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n4.3.1_shared"
+sandbox_win32_static="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n${version}"
+sandbox_win32_shared="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n${version}_shared"
+sandbox_win64_static="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n${version}"
+sandbox_win64_shared="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n${version}_shared"
 
 build_win32_static="${directory}/packages/ffmpeg-${version}-win32-static"
 build_win32_shared="${directory}/packages/ffmpeg-${version}-win32-shared"
