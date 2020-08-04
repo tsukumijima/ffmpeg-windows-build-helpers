@@ -173,10 +173,10 @@ if [ -e "${sandbox_l_smash_win32}/cli/boxdumper.exe" ] && [ -e "${sandbox_l_smas
     cp "${sandbox_l_smash_win32}/cli/muxer.exe" "${package_l_smash}"
     cp "${sandbox_l_smash_win32}/cli/remuxer.exe" "${package_l_smash}"
     cp "${sandbox_l_smash_win32}/cli/timelineeditor.exe" "${package_l_smash}"
-    cp "${sandbox_l_smash_win32}/cli/boxdumper.exe" "${package_l_smash}/x64"
-    cp "${sandbox_l_smash_win32}/cli/muxer.exe" "${package_l_smash}/x64"
-    cp "${sandbox_l_smash_win32}/cli/remuxer.exe" "${package_l_smash}/x64"
-    cp "${sandbox_l_smash_win32}/cli/timelineeditor.exe" "${package_l_smash}/x64"
+    cp "${sandbox_l_smash_win64}/cli/boxdumper.exe" "${package_l_smash}/x64"
+    cp "${sandbox_l_smash_win64}/cli/muxer.exe" "${package_l_smash}/x64"
+    cp "${sandbox_l_smash_win64}/cli/remuxer.exe" "${package_l_smash}/x64"
+    cp "${sandbox_l_smash_win64}/cli/timelineeditor.exe" "${package_l_smash}/x64"
     cp "${sandbox_l_smash_win32}/LICENSE" "${package_l_smash}/LICENSE.txt"
 fi
 
