@@ -4,6 +4,7 @@ output_*/
 .DS_store
 config.log
 sandbox/
+packages/
 
 meson-cross.mingw.txt
 /.vs/slnx.sqlite
