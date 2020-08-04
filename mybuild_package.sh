@@ -1,5 +1,6 @@
 
-# Win32・Win64 両方ビルドすることが前提です
+# ffmpeg-windows-build-helpers でビルド・パッケージを全自動で行うシェルスクリプト
+# Win32・Win64 両方でビルドする（ 1 を選択している）ことが前提です
 
 # ベースディレクトリ
 directory=$(cd $(dirname $0);pwd)
