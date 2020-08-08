@@ -144,8 +144,8 @@ check_missing_packages () {
     exit 1
   fi
   local meson_version=`meson --version`
-  if ! at_least_required_version "0.47" "${meson_version}"; then
-    echo "your meson version is too old $meson_version wanted 0.47"
+  if ! at_least_required_version "0.49.2" "${meson_version}"; then
+    echo "your meson version is too old $meson_version wanted 0.49.2"
     exit 1
   fi
   # also check missing "setup" so it's early LOL
@@ -538,7 +538,7 @@ do_meson() {
 generic_meson() {
     local extra_configure_options="$1"
     mkdir -pv build
-    do_meson "--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --strip --default-library=static --cross-file=${top_dir}/meson-cross.mingw.txt $extra_configure_options . build"
+    do_meson "--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --default-library=static --cross-file=${top_dir}/meson-cross.mingw.txt $extra_configure_options . build"
 }
 
 generic_meson_ninja_install() {
@@ -837,7 +837,7 @@ build_glib() {
     export CPPFLAGS="$CPPFLAGS -pthread -DGLIB_STATIC_COMPILATION"
     export CXXFLAGS="$CFLAGS" # Not certain this is needed, but it doesn't hurt
     export LDFLAGS="-L${mingw_w64_x86_64_prefix}/lib" # For some reason the frexp configure checks fail without this as math.h isn't found when cross-compiling; no negative impact for native builds
-    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --strip --default-library=static -Dinternal_pcre=true -Dforce_posix_threads=true . build"
+    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --default-library=static -Dinternal_pcre=true -Dforce_posix_threads=true . build"
     if [[ $compiler_flavors != "native" ]]; then
       get_local_meson_cross_with_propeties # Need to add flags to meson properties; otherwise ran into some issues
       meson_options+=" --cross-file=meson-cross.mingw.txt"
@@ -1005,7 +1005,7 @@ build_libvmaf() {
     export CXXFLAGS="$CFLAGS -pthread"
     export LDFLAGS="-pthread" # Needed here too for some reason
     mkdir build
-    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --strip --default-library=static . build"
+    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --default-library=static . build"
     if [[ $compiler_flavors != "native" ]]; then
       get_local_meson_cross_with_propeties # Need to add flags to meson properties; otherwise ran into some issues
       meson_options+=" --cross-file=meson-cross.mingw.txt"
@@ -1726,7 +1726,7 @@ build_dav1d() {
       apply_patch file://$patch_dir/david_no_asm.patch -p1 # XXX report
     fi
     cpu_count=1 # XXX report :|
-    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --strip --default-library=static . build"
+    local meson_options="--prefix=${mingw_w64_x86_64_prefix} --libdir=${mingw_w64_x86_64_prefix}/lib --buildtype=release --default-library=static . build"
     if [[ $compiler_flavors != "native" ]]; then
       meson_options+=" --cross-file=${top_dir}/meson-cross.mingw.txt"
     fi
@@ -2453,7 +2453,12 @@ build_ffmpeg() {
       echo "You will find redistributable archive .7z file in $cur_dir/redist"
     fi
     echo `date`
-  cd ..
+    
+  if [[ -z $ffmpeg_source_dir ]]; then
+    cd ..
+  else
+    cd "$work_dir"
+  fi
 }
 
 build_lsw() {
@@ -2807,8 +2812,9 @@ if [[ $compiler_flavors == "native" ]]; then
   #  bs2b doesn't use pkg-config, sndfile needed Carbon :|
   export CPATH=$cur_dir/cross_compilers/native/include:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Carbon.framework/Versions/A/Headers # C_INCLUDE_PATH
   export LIBRARY_PATH=$cur_dir/cross_compilers/native/lib
-  mkdir -p native
-  cd native
+  work_dir="$(realpath $cur_dir/native)"
+  mkdir -p "$work_dir"
+  cd "$work_dir"
     build_ffmpeg_dependencies
     build_ffmpeg
   cd ..
@@ -2827,8 +2833,9 @@ if [[ $compiler_flavors == "multi" || $compiler_flavors == "win32" ]]; then
   bits_target=32
   cross_prefix="$mingw_bin_path/i686-w64-mingw32-"
   make_prefix_options="CC=${cross_prefix}gcc AR=${cross_prefix}ar PREFIX=$mingw_w64_x86_64_prefix RANLIB=${cross_prefix}ranlib LD=${cross_prefix}ld STRIP=${cross_prefix}strip CXX=${cross_prefix}g++"
-  mkdir -p win32
-  cd win32
+  work_dir="$(realpath $cur_dir/win32)"
+  mkdir -p "$work_dir"
+  cd "$work_dir"
     build_ffmpeg_dependencies
     build_apps
   cd ..
@@ -2847,8 +2854,9 @@ if [[ $compiler_flavors == "multi" || $compiler_flavors == "win64" ]]; then
   bits_target=64
   cross_prefix="$mingw_bin_path/x86_64-w64-mingw32-"
   make_prefix_options="CC=${cross_prefix}gcc AR=${cross_prefix}ar PREFIX=$mingw_w64_x86_64_prefix RANLIB=${cross_prefix}ranlib LD=${cross_prefix}ld STRIP=${cross_prefix}strip CXX=${cross_prefix}g++"
-  mkdir -p win64
-  cd win64
+  work_dir="$(realpath $cur_dir/win64)"
+  mkdir -p "$work_dir"
+  cd "$work_dir"
     build_ffmpeg_dependencies
     build_apps
   cd ..
