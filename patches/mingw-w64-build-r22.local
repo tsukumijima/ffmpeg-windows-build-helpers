@@ -75,14 +75,14 @@ gcc='gcc'
 gcc_host=''
 
 ## Versions
-mingw_w64_release_ver='7.0.0'
-gcc_release_ver='10.1.0' # we usually specify this with a param too...
+mingw_w64_release_ver='8.0.0'
+gcc_release_ver='10.2.0' # we usually specify this with a param too...
 gcc_old_release_ver='8.3.0'
-mpfr_release_ver='4.0.2'
-mpc_release_ver='1.1.0'
-binutils_release_ver='2.34'
-gmp_release_ver='6.2.0'
-isl_release_ver='0.22'
+mpfr_release_ver='4.1.0'
+mpc_release_ver='1.2.1'
+binutils_release_ver='2.36.1'
+gmp_release_ver='6.2.1'
+isl_release_ver='0.23'
 pthreads_w32_release_ver='2-9-1'
 
 ## Locations
@@ -473,11 +473,6 @@ if [[ -d "$package_name" ]]; then
   return 0
 fi
 
-case "$archive" in
-  *.tar.gz ) archive_type='gzip' ;;
-  *.tar.bz2 ) archive_type='bzip2' ;;
-  *.tar.xz ) archive_type='xz' ;;
-esac
 if [[ ! -f "$archive" ]]; then
   build_progress "$archive" 'Downloading'
   wget -nv -t 5 "$download_url" > >(build_log) 2>&1
@@ -490,7 +485,7 @@ fi
 
 if [[ ! -d "$package_name" ]]; then
   build_progress "$archive" 'Extracting'
-  if "$archive_type" -d <"$archive" | pax -r ; then
+  if tar -xf "$archive" ; then
     build_progress 'done'
     return 0
   else
@@ -499,7 +494,7 @@ if [[ ! -d "$package_name" ]]; then
     wget -nv "$download_url" > >(build_log) 2>&1
     build_progress 'done'
     build_progress "$archive" 'Extracting'
-    "$archive_type" -d <"$archive" | pax -r
+    tar -xf "$archive"
     build_progress 'done'
   fi
 fi

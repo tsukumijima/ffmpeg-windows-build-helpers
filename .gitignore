@@ -4,6 +4,7 @@ output_*/
 .DS_store
 config.log
 sandbox/
+.vs/
 packages/
 
 meson-cross.mingw.txt
