@@ -2313,6 +2313,12 @@ build_ffmpeg() {
 
   cd $output_dir
     apply_patch file://$patch_dir/frei0r_load-shared-libraries-dynamically.diff
+    # Reference:
+    # https://github.com/rdp/ffmpeg-windows-build-helpers/issues/554
+    # https://github.com/rdp/ffmpeg-windows-build-helpers/issues/575
+    if [[ $ffmpeg_git_checkout_version == *"n4.4"* ]] || [[ $ffmpeg_git_checkout_version == *"n4.3"* ]] || [[ $ffmpeg_git_checkout_version == *"n4.2"* ]] || [[ $ffmpeg_git_checkout_version == *"n4.1"* ]] || [[ $ffmpeg_git_checkout_version == *"n4.0"* ]]; then
+      apply_patch file://$patch_dir/ffmpeg-windres-fix.patch
+    fi
     if [ "$bits_target" != "32" ]; then
 
       # SVT-VP9
@@ -2360,7 +2366,7 @@ build_ffmpeg() {
     fi
 
     # cuda-llvm, libdav1d is only supported by ffmpeg 4.2 series or later
-    if [[ $ffmpeg_git_checkout_version != *"n4.0"* ]] && [[ $ffmpeg_git_checkout_version != *"n4.1"* ]]; then
+    if [[ $ffmpeg_git_checkout_version != *"n4.1"* ]] && [[ $ffmpeg_git_checkout_version != *"n4.0"* ]]; then
       config_options+=" --enable-cuda-llvm --enable-libdav1d"
     fi
 
@@ -2402,7 +2408,7 @@ build_ffmpeg() {
         config_options+=" --enable-libxavs" # don't compile OS X
       fi
       # libaribb24 is only supported by ffmpeg 4.2 series or later
-      if [[ $ffmpeg_git_checkout_version != *"n4.0"* ]] && [[ $ffmpeg_git_checkout_version != *"n4.1"* ]]; then
+      if [[ $ffmpeg_git_checkout_version != *"n4.1"* ]] && [[ $ffmpeg_git_checkout_version != *"n4.0"* ]]; then
         config_options+=" --enable-libaribb24"
       fi
     fi
