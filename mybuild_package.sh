@@ -1,6 +1,6 @@
 
-# ffmpeg-windows-build-helpers でビルド・パッケージを全自動で行うシェルスクリプト
-# Win32・Win64 両方でビルドする（ 1 を選択している）ことが前提です
+# ffmpeg-windows-build-helpers でビルド・パッケージングを全自動で行うシェルスクリプト
+# Win32・Win64・Native 全てで Static・Shared の両方をビルドする
 
 # ベースディレクトリ
 directory=$(cd $(dirname $0);pwd)
@@ -41,15 +41,26 @@ if [ $# != 1 ]; then
 	exit 1
 fi
 
-# ビルド開始
+# Win32・Win64 のビルド開始
+# L-SMASH Works をビルドする場合は --build-lsw=y \ を追加（ ffmpeg 4.4 以降ではビルドに失敗する）
 time "${directory}/cross_compile_ffmpeg.sh" \
                   --build-ffmpeg-static=y \
                   --build-ffmpeg-shared=y \
                   --build-intel-qsv=y \
                   --build-amd-amf=y \
-                  --build-lsw=y \
                   --disable-nonfree=n \
-                  --ffmpeg-git-checkout-version=n${version} 
+                  --compiler-flavors=multi \
+                  --ffmpeg-git-checkout-version=n${version}
+
+# Native のビルド開始
+time "${directory}/cross_compile_ffmpeg.sh" \
+                  --build-ffmpeg-static=y \
+                  --build-ffmpeg-shared=y \
+                  --build-intel-qsv=y \
+                  --build-amd-amf=y \
+                  --disable-nonfree=n \
+                  --compiler-flavors=native \
+                  --ffmpeg-git-checkout-version=n${version}
 
 # パッケージフォルダを作成
 mkdir -p "${directory}/packages"
