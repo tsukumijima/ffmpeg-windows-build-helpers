@@ -2372,7 +2372,7 @@ build_ffmpeg() {
     config_options+=" --enable-libvpx"
     #config_options+=" --enable-libsvtvp9" #not currently working but compiles if configured
 
-    if [[ $compiler_flavors != "native" ]]; then
+    if [[ $OSTYPE != darwin* ]]; then
       config_options+=" --enable-nvenc --enable-nvdec" # don't work OS X
     fi
 
