@@ -1755,8 +1755,7 @@ build_libvpx() {
       local config_options="--target=x86_64-win64-gcc"
     fi
     export CROSS="$cross_prefix"  # XXX investigate/report ssse3? huh wuh?
-    local config_options+=" --disable-ssse3" # Comment it out when building ffmpeg 4.1 series or lower.
-    do_configure "$config_options --prefix=$mingw_w64_x86_64_prefix --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9-highbitdepth --extra-cflags=-fno-asynchronous-unwind-tables --extra-cflags=-mstackrealign" # fno for Error: invalid register for .seh_savexmm
+    do_configure "$config_options --prefix=$mingw_w64_x86_64_prefix --disable-ssse3 --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9-highbitdepth --extra-cflags=-fno-asynchronous-unwind-tables --extra-cflags=-mstackrealign" # fno for Error: invalid register for .seh_savexmm
     do_make_and_make_install
     unset CROSS
   cd ..
@@ -2360,14 +2359,10 @@ build_ffmpeg() {
       # config_options+=" --enable-libsvtvp9"
     fi
 
-    # cuda-llvm is supported by ffmpeg 4.2 series or later, so comment it out when building ffmpeg 4.1 series or lower.
-    config_options+=" --enable-cuda-llvm"
-
-    # libdav1d is supported by ffmpeg 4.2 series or later, so comment it out when building ffmpeg 4.1 series or lower.
-    config_options+=" --enable-libdav1d"
-
-    # libaribb24 is supported by ffmpeg 4.2 series or later, so comment it out when building ffmpeg 4.1 series or lower.
-    config_options+=" --enable-libaribb24"
+    # cuda-llvm, libdav1d, libaribb24 is only supported by ffmpeg 4.2 series or later
+    if [[ $ffmpeg_git_checkout_version != *"n4.0"* ]] && [[ $ffmpeg_git_checkout_version != *"n4.1"* ]] then
+      config_options+=" --enable-cuda-llvm --enable-libdav1d --enable-libaribb24"
+    fi
 
     #aom must be disabled to use SVT-AV1
     config_options+=" --enable-libaom"
