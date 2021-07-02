@@ -13,10 +13,14 @@ sandbox_win32_static="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n${vers
 sandbox_win32_shared="${directory}/sandbox/win32/ffmpeg_git_with_fdk_aac_n${version}_shared"
 sandbox_win64_static="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n${version}"
 sandbox_win64_shared="${directory}/sandbox/win64/ffmpeg_git_with_fdk_aac_n${version}_shared"
+sandbox_native_static="${directory}/sandbox/native/ffmpeg_git_with_fdk_aac_n${version}"
+sandbox_native_shared="${directory}/sandbox/native/ffmpeg_git_with_fdk_aac_n${version}_shared"
 sandbox_x264_win32="${directory}/sandbox/win32/x264_all_bitdepth"
 sandbox_x264_win64="${directory}/sandbox/win64/x264_all_bitdepth"
+sandbox_x264_native="${directory}/sandbox/native/x264_all_bitdepth"
 sandbox_x265_win32="${directory}/sandbox/win32/x265_all_bitdepth"
 sandbox_x265_win64="${directory}/sandbox/win64/x265_all_bitdepth"
+sandbox_x265_native="${directory}/sandbox/native/x265_all_bitdepth"
 sandbox_l_smash_win32="${directory}/sandbox/win32/l-smash"
 sandbox_l_smash_win64="${directory}/sandbox/win64/l-smash"
 sandbox_l_smash_works_win32="${directory}/sandbox/win32/lsw"
@@ -27,6 +31,8 @@ package_win32_static="${directory}/packages/FFmpeg-${version}-32bit-Static"
 package_win32_shared="${directory}/packages/FFmpeg-${version}-32bit-Shared"
 package_win64_static="${directory}/packages/FFmpeg-${version}-64bit-Static"
 package_win64_shared="${directory}/packages/FFmpeg-${version}-64bit-Shared"
+package_native_static="${directory}/packages/FFmpeg-${version}-Native-Static"
+package_native_shared="${directory}/packages/FFmpeg-${version}-Native-Shared"
 package_x264="${directory}/packages/x264-FFmpeg-${version}"
 package_x265="${directory}/packages/x265-FFmpeg-${version}"
 package_l_smash="${directory}/packages/L-SMASH-FFmpeg-${version}"
@@ -141,14 +147,35 @@ if [ -e "${sandbox_win64_shared}/bin/ffmpeg.exe" ]; then
     cp "${directory}/LICENSE" "${package_win64_shared}/LICENSE.txt"
 fi
 
+# FFmpeg Native (Static)
+if [ -e "${sandbox_native_static}/ffmpeg" ]; then
+    echo -e "Packaging 64-bit static builds...\n"
+    mkdir -p "${package_native_static}"
+    mkdir -p "${package_native_static}/bin"
+    mkdir -p "${package_native_static}/doc"
+    mkdir -p "${package_native_static}/presets"
+    cp "${sandbox_native_static}/ffmpeg" "${package_native_static}/bin"
+    cp "${sandbox_native_static}/ffprobe" "${package_native_static}/bin"
+    cp "${sandbox_native_static}/ffplay" "${package_native_static}/bin"
+    for doc in ${sandbox_native_static}/doc/*.{html,css}; do
+        cp "${doc}" "${package_native_static}/doc"
+    done
+    for presets in ${sandbox_native_static}/presets/*.ffpreset; do
+        cp "${presets}" "${package_native_static}/presets"
+    done
+    cp "${directory}/LICENSE" "${package_native_static}/LICENSE.txt"
+fi
+
 # x264
 if [ -e "${sandbox_x264_win32}/x264.exe" ] && [ -e "${sandbox_x264_win64}/x264.exe" ]; then
     echo -e "Packaging x264 builds...\n"
     mkdir -p "${package_x264}"
     mkdir -p "${package_x264}/x64"
+    mkdir -p "${package_x264}/native"
     mkdir -p "${package_x264}/doc"
     cp "${sandbox_x264_win32}/x264.exe" "${package_x264}"
     cp "${sandbox_x264_win64}/x264.exe" "${package_x264}/x64"
+    cp "${sandbox_x264_native}/x264" "${package_x264}/native"
     cp "${sandbox_x264_win32}/AUTHORS" "${package_x264}/AUTHORS.txt"
     cp "${sandbox_x264_win32}/COPYING" "${package_x264}/COPYING.txt"
     for doc in ${sandbox_x264_win32}/doc/*.txt; do
@@ -161,11 +188,13 @@ if [ -e "${sandbox_x265_win32}/8bit/x265.exe" ] && [ -e "${sandbox_x265_win64}/8
     echo -e "Packaging x265 builds...\n"
     mkdir -p "${package_x265}"
     mkdir -p "${package_x265}/x64"
+    mkdir -p "${package_x265}/native"
     mkdir -p "${package_x265}/doc"
     mkdir -p "${package_x265}/doc/intra"
     mkdir -p "${package_x265}/doc/reST"
     cp "${sandbox_x265_win32}/8bit/x265.exe" "${package_x265}"
     cp "${sandbox_x265_win64}/8bit/x265.exe" "${package_x265}/x64"
+    cp "${sandbox_x265_native}/8bit/x265" "${package_x265}/native"
     cp "${sandbox_x265_win32}/COPYING" "${package_x265}/COPYING.txt"
     cp "${sandbox_x265_win32}/readme.rst" "${package_x265}/"
     for doc in ${sandbox_x265_win32}/doc/intra/*.txt; do
