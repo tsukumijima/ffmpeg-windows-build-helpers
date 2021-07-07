@@ -810,7 +810,7 @@ build_sdl2() {
     if [[ $compiler_flavors == "native" ]]; then
       unset PKG_CONFIG_LIBDIR # Allow locally installed things for native builds; libpulse-dev is an important one otherwise no audio for most Linux
     fi
-    generic_configure "--bindir=$mingw_bin_path"
+    generic_configure "--bindir=$mingw_bin_path --with-pic"
     do_make_and_make_install
     if [[ $compiler_flavors == "native" ]]; then
       export PKG_CONFIG_LIBDIR=
@@ -869,14 +869,15 @@ build_libleptonica() {
   do_git_checkout https://github.com/DanBloomberg/leptonica.git leptonica_git 1.80.0
   cd leptonica_git
     export CPPFLAGS="-DOPJ_STATIC"
-    generic_configure_make_install
+    generic_configure "--with-pic"
+    do_make_and_make_install
     reset_cppflags
   cd ..
 }
 
 build_libtiff() {
   build_libjpeg_turbo # auto uses it?
-  generic_download_and_make_and_install http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
+  generic_download_and_make_and_install http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz "tiff-4.1.0" "--with-pic"
   sed -i.bak 's/-ltiff.*$/-ltiff -llzma -ljpeg -lz/' $PKG_CONFIG_PATH/libtiff-4.pc # static deps
 }
 
@@ -918,7 +919,7 @@ build_lensfun() {
   do_git_checkout https://github.com/lensfun/lensfun.git lensfun_git
   cd lensfun_git
     export CMAKE_STATIC_LINKER_FLAGS='-lws2_32 -pthread'
-    do_cmake "-DBUILD_STATIC=on -DCMAKE_INSTALL_DATAROOTDIR=$mingw_w64_x86_64_prefix"
+    do_cmake "-DBUILD_STATIC=on -DCMAKE_INSTALL_DATAROOTDIR=$mingw_w64_x86_64_prefix -DCMAKE_CXX_FLAGS=-fPIC"
     do_make
     do_make_install
     sed -i.bak 's/-llensfun/-llensfun -lstdc++/' "$PKG_CONFIG_PATH/lensfun.pc"
@@ -937,7 +938,8 @@ build_libtesseract() {
       do_make_and_make_install
       sed -i.bak 's/-ltesseract.*$/-ltesseract -lstdc++ -lws2_32 -llept -ltiff -llzma -ljpeg -lz/' $PKG_CONFIG_PATH/tesseract.pc # why does it needs winsock? LOL plus all of libtiff's <sigh>
     else
-      generic_configure_make_install
+      generic_configure "--with-pic"
+      do_make_and_make_install
       sed -i.bak 's/-ltesseract.*$/-ltesseract -lstdc++ -llept -ltiff -llzma -ljpeg -lz -lgomp/' $PKG_CONFIG_PATH/tesseract.pc # see above, gomp for linux native
     fi
   cd ..
@@ -946,7 +948,8 @@ build_libtesseract() {
 build_libzimg() {
   do_git_checkout https://github.com/sekrit-twc/zimg.git zimg_git
   cd zimg_git
-    generic_configure_make_install
+    generic_configure "--with-pic"
+    do_make_and_make_install
   cd ..
 }
 
@@ -979,7 +982,7 @@ build_glfw() {
 build_libpng() {
   do_git_checkout https://github.com/glennrp/libpng.git
   cd libpng_git
-    generic_configure
+    generic_configure "--with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1049,7 +1052,7 @@ build_freetype() {
 build_libxml2() {
   download_and_unpack_file http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz libxml2-2.9.10
   cd libxml2-2.9.10
-    generic_configure "--with-ftp=no --with-http=no --with-python=no"
+    generic_configure "--with-ftp=no --with-http=no --with-python=no --with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1086,7 +1089,7 @@ build_fontconfig() {
   download_and_unpack_file https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.13.92.tar.xz
   cd fontconfig-2.13.92
     #export CFLAGS= # compile fails with -march=sandybridge ... with mingw 4.0.6 at least ...
-    generic_configure "--enable-iconv --enable-libxml2 --disable-docs --with-libiconv" # Use Libxml2 instead of Expat.
+    generic_configure "--enable-iconv --enable-libxml2 --disable-docs --with-libiconv --with-pic" # Use Libxml2 instead of Expat.
     do_make_and_make_install
     #reset_cflags
   cd ..
@@ -1097,7 +1100,7 @@ build_gmp() {
   cd gmp-6.2.0
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
     #export CPP_FOR_BUILD=usr/bin/cpp
-    generic_configure "ABI=$bits_target"
+    generic_configure "ABI=$bits_target --with-pic"
     #unset CC_FOR_BUILD
     #unset CPP_FOR_BUILD
     do_make_and_make_install
@@ -1147,7 +1150,7 @@ build_unistring() {
 }
 
 build_libidn2() {
-  generic_download_and_make_and_install https://ftp.gnu.org/gnu/libidn/libidn2-2.3.0.tar.gz
+  generic_download_and_make_and_install https://ftp.gnu.org/gnu/libidn/libidn2-2.3.0.tar.gz libidn2-2.3.0 "--enable-shared"
 }
 
 build_gnutls() {
@@ -1158,7 +1161,7 @@ build_gnutls() {
     # --disable-guile is so that if it finds guile installed (cygwin did/does) it won't try and link/build to it and fail...
     # libtasn1 is some dependency, appears provided is an option [see also build_libnettle]
     # pks #11 hopefully we don't need kit
-    generic_configure "--disable-doc --disable-tools --disable-cxx --disable-tests --disable-gtk-doc-html --disable-libdane --disable-nls --enable-local-libopts --disable-guile --with-included-libtasn1 --without-p11-kit"
+    generic_configure "--disable-doc --disable-tools --disable-cxx --disable-tests --disable-gtk-doc-html --disable-libdane --disable-nls --enable-local-libopts --disable-guile --with-included-libtasn1 --without-p11-kit --with-pic"
     do_make_and_make_install
     if [[ $compiler_flavors != "native"  ]]; then
       # libsrt doesn't know how to use its pkg deps :| https://github.com/Haivision/srt/issues/565
@@ -1286,7 +1289,7 @@ build_libvorbis() {
 build_libopus() {
   do_git_checkout https://github.com/xiph/opus.git
   cd opus_git
-    generic_configure "--disable-doc --disable-extra-programs --disable-stack-protector"
+    generic_configure "--disable-doc --disable-extra-programs --disable-stack-protector --with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1304,7 +1307,7 @@ build_libspeex() {
   cd speex_git
     export SPEEXDSP_CFLAGS="-I$mingw_w64_x86_64_prefix/include"
     export SPEEXDSP_LIBS="-L$mingw_w64_x86_64_prefix/lib -lspeexdsp" # 'configure' somehow can't find SpeexDSP with 'pkg-config'.
-    generic_configure "--disable-binaries" # If you do want the libraries, then 'speexdec.exe' needs 'LDFLAGS=-lwinmm'.
+    generic_configure "--disable-binaries --with-pic" # If you do want the libraries, then 'speexdec.exe' needs 'LDFLAGS=-lwinmm'.
     do_make_and_make_install
     unset SPEEXDSP_CFLAGS
     unset SPEEXDSP_LIBS
@@ -1339,7 +1342,7 @@ build_lame() {
   do_svn_checkout https://svn.code.sf.net/p/lame/svn/trunk/lame lame_svn r6474
   cd lame_svn
     sed -i.bak '1s/^\xEF\xBB\xBF//' libmp3lame/i386/nasm.h # Remove a UTF-8 BOM that breaks nasm if it's still there; should be fixed in trunk eventually https://sourceforge.net/p/lame/patches/81/
-    generic_configure "--enable-nasm"
+    generic_configure "--enable-nasm --with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1351,7 +1354,8 @@ build_twolame() {
       sed -i.bak "/^SUBDIRS/s/ frontend.*//" Makefile.am || exit 1
     fi
     cpu_count=1 # maybe can't handle it http://betterlogic.com/roger/2017/07/mp3lame-woe/ comments
-    generic_configure_make_install
+    generic_configure "--with-pic"
+    do_make_and_make_install
     cpu_count=$original_cpu_count
   cd ..
 }
@@ -1374,7 +1378,7 @@ local checkout_dir=fdk-aac_git
 
 build_libopencore() {
   generic_download_and_make_and_install https://sourceforge.net/projects/opencore-amr/files/opencore-amr/opencore-amr-0.1.5.tar.gz
-  generic_download_and_make_and_install https://sourceforge.net/projects/opencore-amr/files/vo-amrwbenc/vo-amrwbenc-0.1.3.tar.gz
+  generic_download_and_make_and_install https://sourceforge.net/projects/opencore-amr/files/vo-amrwbenc/vo-amrwbenc-0.1.3.tar.gz vo-amrwbenc-0.1.3 "--with-pic"
 }
 
 build_libilbc() {
@@ -1393,7 +1397,8 @@ build_libmodplug() {
       autoreconf -fiv || exit 1
       automake --add-missing || exit 1
     fi
-    generic_configure_make_install # or could use cmake I guess
+    generic_configure "--with-pic"
+    do_make_and_make_install
   cd ..
 }
 
@@ -1471,7 +1476,7 @@ build_libbluray() {
         generic_configure # Generate 'udfread-version.h', or building Libbluray fails otherwise.
       fi
     cd ../..
-    generic_configure "--disable-examples --disable-bdjava-jar"
+    generic_configure "--disable-examples --disable-bdjava-jar --with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1532,7 +1537,7 @@ build_vamp_plugin() {
 build_fftw() {
   download_and_unpack_file http://fftw.org/fftw-3.3.8.tar.gz
   cd fftw-3.3.8
-    generic_configure "--disable-doc"
+    generic_configure "--disable-doc --with-pic"
     do_make_and_make_install
   cd ..
 }
@@ -1639,7 +1644,7 @@ build_libcaca() {
       sed -i.bak "s/__declspec(dllexport)//g" *.h # get rid of the declspec lines otherwise the build will fail for undefined symbols
       sed -i.bak "s/__declspec(dllimport)//g" *.h
     cd ..
-    generic_configure "--libdir=$mingw_w64_x86_64_prefix/lib --disable-csharp --disable-java --disable-cxx --disable-python --disable-ruby --disable-doc --disable-cocoa --disable-ncurses"
+    generic_configure "--libdir=$mingw_w64_x86_64_prefix/lib --disable-csharp --disable-java --disable-cxx --disable-python --disable-ruby --disable-doc --disable-cocoa --disable-ncurses --with-pic"
     do_make_and_make_install
     if [[ $compiler_flavors == "native" ]]; then
       sed -i.bak "s/-lcaca.*/-lcaca -lX11/" $PKG_CONFIG_PATH/caca.pc
@@ -1661,7 +1666,7 @@ build_zvbi() {
       apply_patch file://$patch_dir/zvbi-win32.patch
     fi
     apply_patch file://$patch_dir/zvbi-no-contrib.diff # weird issues with some stuff in contrib...
-    generic_configure " --disable-dvb --disable-bktr --disable-proxy --disable-nls --without-doxygen --without-libiconv-prefix"
+    generic_configure " --disable-dvb --disable-bktr --disable-proxy --disable-nls --without-doxygen --without-libiconv-prefix --with-pic"
     # Without '--without-libiconv-prefix' 'configure' would otherwise search for and only accept a shared Libiconv library.
     do_make_and_make_install
   cd ..
@@ -1685,14 +1690,18 @@ build_libsrt() {
       do_cmake "-DUSE_GNUTLS=ON -DENABLE_SHARED=OFF"
       apply_patch file://$patch_dir/srt.app.patch -p1
     else
-      do_cmake "-DUSE_GNUTLS=ON -DENABLE_SHARED=OFF -DENABLE_CXX11=OFF"
+      do_cmake "-DUSE_GNUTLS=ON -DENABLE_SHARED=OFF -DENABLE_CXX11=OFF -DCMAKE_CXX_FLAGS=-fPIC"
     fi
     do_make_and_make_install
   cd ..
 }
 
 build_libass() {
-  do_git_checkout_and_make_install https://github.com/libass/libass.git
+  do_git_checkout https://github.com/libass/libass.git libass_git
+  cd libass_git
+    generic_configure "--with-pic"
+    do_make_and_make_install
+  cd ..
 }
 
 build_libaribb24() {
@@ -1755,7 +1764,7 @@ build_libvpx() {
       local config_options="--target=x86_64-win64-gcc"
     fi
     export CROSS="$cross_prefix"  # XXX investigate/report ssse3? huh wuh?
-    do_configure "$config_options --prefix=$mingw_w64_x86_64_prefix --disable-ssse3 --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9-highbitdepth --extra-cflags=-fno-asynchronous-unwind-tables --extra-cflags=-mstackrealign" # fno for Error: invalid register for .seh_savexmm
+    do_configure "$config_options --prefix=$mingw_w64_x86_64_prefix --disable-ssse3 --enable-static --disable-shared --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp9-highbitdepth --extra-cflags=-fno-asynchronous-unwind-tables --extra-cflags=-mstackrealign --extra-cflags=-fPIC" # fno for Error: invalid register for .seh_savexmm
     do_make_and_make_install
     unset CROSS
   cd ..
@@ -1928,7 +1937,7 @@ build_libx264() {
       # I wasn't able to figure out how/if this gave any speedup...
       # TODO more march=native here?
       # TODO profile guided here option, with wine?
-      do_configure "$configure_flags"
+      do_configure "$configure_flag --enable-pic"
       curl -4 http://samples.mplayerhq.hu/yuv4mpeg2/example.y4m.bz2 -O --fail || exit 1
       rm -f example.y4m # in case it exists already...
       bunzip2 example.y4m.bz2 || exit 1
@@ -1937,7 +1946,7 @@ build_libx264() {
       do_make_and_make_install "fprofiled VIDS=example.y4m" # guess it has its own make fprofiled, so we don't need to manually add -fprofile-generate here...
     else
       # normal path non profile guided
-      do_configure "$configure_flags"
+      do_configure "$configure_flags --enable-pic"
       do_make
       do_make_install
     fi
@@ -1985,7 +1994,7 @@ build_libdvdcss() {
 build_libjpeg_turbo() {
   do_git_checkout https://github.com/libjpeg-turbo/libjpeg-turbo libjpeg-turbo_git "origin/main"
   cd libjpeg-turbo_git
-    local cmake_params="-DENABLE_SHARED=0 -DCMAKE_ASM_NASM_COMPILER=yasm"
+    local cmake_params="-DENABLE_SHARED=0 -DCMAKE_ASM_NASM_COMPILER=yasm -DCMAKE_C_FLAGS=-fPIC"
     if [[ $compiler_flavors != "native" ]]; then
       cmake_params+=" -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake"
       local target_proc=AMD64
@@ -2872,7 +2881,7 @@ if [[ $compiler_flavors == "native" ]]; then
   mkdir -p "$work_dir"
   cd "$work_dir"
     build_ffmpeg_dependencies
-    build_ffmpeg
+    build_apps
   cd ..
 fi
 
